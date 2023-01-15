@@ -12,8 +12,8 @@ $(document).ready( function() {
 	let braille = { 
 		marginWidth: 20, 
 		marginHeight: 20, 
-		paperWidth: 170, 
-		paperHeight: 125, 
+		paperWidth: 210, 
+		paperHeight: 297, 
 		letterWidth: 2.54, 
 		dotRadius: 1.25, 
 		letterPadding: 3.75, 
@@ -88,6 +88,14 @@ $(document).ready( function() {
 		return 'G1' + gcodePosition(X, Y, Z)
 	}
 
+	let gcodeMoveSelenoid = function(state) {
+		if(state == true) 	//move Needle down
+			return 'M3;\r\n'
+		if(state == false)	//move Needle up
+			return 'M5;\r\n'
+	}
+
+
 	// draw SVG
 	let dotAt = (point, gcode, bounds, lastDot)=> {
 		let px = braille.invertX ? -point.x : braille.paperWidth - point.x;
@@ -95,9 +103,9 @@ $(document).ready( function() {
 		gcode.code += gcodeMoveTo(braille.mirrorX ? -px : px, braille.mirrorY ? -py : py)
 		
 		// move printer head
-		gcode.code += gcodeMoveTo(null, null, braille.headDownPosition)
+		gcode.code += gcodeMoveSelenoid(1)
 		if(braille.svgDots || lastDot) {
-			gcode.code += gcodeMoveTo(null, null, braille.headUpPosition)
+			gcode.code += gcodeMoveSelenoid(0)
 		}
 	}
 
@@ -173,7 +181,7 @@ $(document).ready( function() {
 		if(braille.goToZero) {
 			gcode += gcodeMoveTo(0, 0, 0)
 		}
-		gcode += gcodeMoveTo(0, 0, headUpPosition)
+		gcode += gcodeMoveSelenoid(false)
 
 		// initialize position: top left + margin
 		let currentX = braille.marginWidth;
@@ -277,8 +285,8 @@ $(document).ready( function() {
 						}
 						
 						// move printer head
-						gcode += gcodeMoveTo(null, null, headDownPosition)
-						gcode += gcodeMoveTo(null, null, headUpPosition)
+						gcode += gcodeMoveSelenoid(true)
+						gcode += gcodeMoveSelenoid(false)
 					}
 				}
 			}
